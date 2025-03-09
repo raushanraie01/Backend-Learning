@@ -2,9 +2,9 @@
   "name": "basicsfy",
   "version": "1.0.0",
   "description": "basic project",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "dev": "nodemon src/index.js"
   },
   "author": "raushan raie",
   "license": "ISC",
