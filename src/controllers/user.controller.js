@@ -41,10 +41,12 @@ const registerUser = asyncHandler(async (req, res) => {
     ? path.resolve(req.files.coverImage[0].path)
     : null;
 
-  console.log("Uploading Avatar:", avatarLocalPath);
+  // console.log("Uploading Avatar:", avatarLocalPath);
 
   // Upload avatar to Cloudinary
   const avatarUpload = await uploadOnCloudinary(avatarLocalPath);
+  // console.log(avatarUpload);
+
   if (!avatarUpload || !avatarUpload.url) {
     throw new ApiError(500, "Failed to upload avatar");
   }
@@ -52,7 +54,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // Upload cover image (optional)
   let coverImageUpload = null;
   if (coverImageLocalPath) {
-    console.log("Uploading Cover Image:", coverImageLocalPath);
+    // console.log("Uploading Cover Image:", coverImageLocalPath);
     coverImageUpload = await uploadOnCloudinary(coverImageLocalPath);
   }
 
