@@ -12,6 +12,7 @@ const userSchema = new Schema(
       lowercase: true,
       index: true, //for searching and all
     },
+
     email: {
       type: String,
       required: [true, "Email must be required"],
@@ -19,33 +20,38 @@ const userSchema = new Schema(
       trim: true,
       lowercase: true,
     },
+
     fullName: {
       type: String,
       required: [true, "Fullname must be required"],
       trim: true,
       index: true,
     },
+
+    password: {
+      type: String,
+      required: [true, "password must be required"],
+    },
+
     avatar: {
       type: String, //cloudinary url
       required: true,
     },
+
     coverImage: {
       type: String, //cloudinary url
       required: true,
     },
+
     watchHistory: [
       {
         type: Schema.Types.ObjectId,
         ref: "video",
       },
     ],
-    password: {
+
+    refreshToken: {
       type: String,
-      required: [true, "password must be required"],
-    },
-    freshToken: {
-      type: String,
-      required: true,
     },
   },
   {
@@ -55,7 +61,7 @@ const userSchema = new Schema(
 
 //middleware
 userSchema.pre("save", async function (next) {
-  if (!this.ismodified("password")) return next();
+  if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
