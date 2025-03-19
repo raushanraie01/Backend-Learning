@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/ApiError.js";
 
 //User Schema
 const userSchema = new Schema(
@@ -72,7 +74,11 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 };
 
 userSchema.methods.generateAccessToken = function () {
-  return jwt.sign(
+  if (!process.env.ACCESS_TOKEN_SECRET || !process.env.ACCESS_TOKEN_EXPIRY) {
+    throw new ApiError("Missing environment variables for token generation");
+  }
+
+  const token = jwt.sign(
     {
       _id: this._id,
       email: this.email,
@@ -86,16 +92,22 @@ userSchema.methods.generateAccessToken = function () {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
+  // console.log("Access Token code is Generated", token);
+
+  return token;
 };
 
 userSchema.methods.generateRefreshToken = function () {
+  if (!process.env.REFRESH_TOKEN_SECRET || !process.env.REFRESH_TOKEN_EXPIRY) {
+    throw new ApiError(
+      "Missing environment variables for Refresh token generation"
+    );
+  }
   return jwt.sign(
     {
       _id: this._id,
     },
-
     process.env.REFRESH_TOKEN_SECRET,
-
     {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
