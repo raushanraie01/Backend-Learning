@@ -4,7 +4,21 @@ import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import path from "path";
-import fs from "fs";
+
+const generateRefreshAndAccessToken = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "Something went wrong! while genrating access and refresh token"
+    );
+  }
+};
+
+/////
 //1.)get the data from the browser using req.body which contain all the text data
 //2.)checking validation
 //3.)check user or email already exits
@@ -14,9 +28,6 @@ import fs from "fs";
 //7.)remove password and refresh token from respone
 //8.)check wheater user is created or not
 //9.)return response
-
-/////
-
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password, fullName } = req.body;
 
@@ -40,8 +51,6 @@ const registerUser = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.files.coverImage?.[0]?.path
     ? path.resolve(req.files.coverImage[0].path)
     : null;
-
-  // console.log("Uploading Avatar:", avatarLocalPath);
 
   // Upload avatar to Cloudinary
   const avatarUpload = await uploadOnCloudinary(avatarLocalPath);
@@ -80,4 +89,27 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "User created successfully"));
 });
 
+//
+//receive input from user i.e email,username,password
+// check wheather it`s right or wrong
+//find the user
+// access and refresh token
+//send them a cookie
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, username, password } = req.body;
+  if (!username || !email) {
+    throw new ApiError(400, "username or email is required");
+  }
+
+  const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+  if (!user) {
+    throw new ApiError(404, "User does not exist!");
+  }
+  const isPasswordValid = await user.isPasswordCorrect(password);
+  if (!isPasswordValid) {
+    throw new error(401, " Invalid user credentials");
+  }
+});
 export { registerUser };

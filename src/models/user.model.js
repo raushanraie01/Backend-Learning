@@ -66,7 +66,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-//Methods for adding some functions in schema
+//Methods for adding some functions that will check password after encryption in schema
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
