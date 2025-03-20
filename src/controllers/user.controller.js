@@ -315,7 +315,46 @@ const updateUserCoverIamge = asyncHandler(async (req, res) => {
       new ApiResponse(200, { user }, "avatar file is uploaded successfully")
     );
 });
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
 
+  if (!username?.trim()) {
+    throw new ApiError(400, "username is Invalid");
+  }
+
+  await User.aggregate([
+    {
+      //filtering document
+      $match: { username: username?.toLowerCase() },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",\
+        as:"subscribers"
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as:"subscribedTo"
+      },
+    },
+    {
+      $addFields:{
+        subscribersCount:{
+          $size:"$subscribers"
+        },
+        channelsSubsceibedToCount:{
+          $size:"$subscribedTo"
+        }
+      }
+    }
+  ]);
+});
 export {
   registerUser,
   loginUser,
