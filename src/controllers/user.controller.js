@@ -322,12 +322,14 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(400, "username is Invalid");
   }
 
-  await User.aggregate([
+  const channel = await User.aggregate([
     {
       //filtering document
       $match: { username: username?.toLowerCase() },
     },
+
     {
+      //looking another collection and storing channel in filtered user
       $lookup: {
         from: "subscriptions",
         localField: "_id",
@@ -335,7 +337,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         as: "subscribers",
       },
     },
+
     {
+      //looking another collection and storing subscriber in filtered user
+
       $lookup: {
         from: "subscriptions",
         localField: "_id",
@@ -343,6 +348,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         as: "subscribedTo",
       },
     },
+
     {
       $addFields: {
         subscribersCount: {
@@ -351,9 +357,36 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         channelsSubsceibedToCount: {
           $size: "$subscribedTo",
         },
+
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] }, //In valid fopr object as well as array
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        subscribersCount: 1,
+        channelsSubsceibedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
       },
     },
   ]);
+  if (!channel?.length) {
+    throw new ApiError(404, "Channel doen not exists");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, channel[0], "channel fetched successfully"));
 });
 export {
   registerUser,
