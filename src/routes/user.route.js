@@ -36,5 +36,6 @@ router.route("/login").post(loginUser);
 //secured Routes
 router.route("/logout").post(verifyJWT, logoutUser); //verifyJWT is middleware
 router.route("/refresh-token").post(refreshAccessToken);
+router.route("/reset-password");
 
 export default router;

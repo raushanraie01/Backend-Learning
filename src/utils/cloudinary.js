@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
-import path from "path";
+import streamifier from "streamifier";
+
+// import fs from "fs";
+// import path from "path";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,22 +10,36 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const uploadOnCloudinary = async (filePath) => {
-  try {
-    if (!fs.existsSync(filePath)) {
-      throw new Error("File does not exist: " + filePath);
-    }
+// export const uploadOnCloudinary = async (filePath) => {
+//   try {
+//     if (!fs.existsSync(filePath)) {
+//       throw new Error("File does not exist: " + filePath);
+//     }
 
-    const response = await cloudinary.uploader.upload(filePath, {
-      resource_type: "auto",
-    });
+//     const response = await cloudinary.uploader.upload(filePath, {
+//       resource_type: "auto",
+//     });
 
-    // Remove local file after successful upload
-    fs.unlinkSync(filePath);
+//     // Remove local file after successful upload
+//     fs.unlinkSync(filePath);
 
-    return response;
-  } catch (error) {
-    console.error("Cloudinary Upload Error:", error);
-    return null;
-  }
+//     return response;
+//   } catch (error) {
+//     console.error("Cloudinary Upload Error:", error);
+//     return null;
+//   }
+// };
+
+export const uploadOnCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "my-app" },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
 };

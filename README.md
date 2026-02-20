@@ -1,4 +1,4 @@
- # YouTube Project
+# YouTube Project
 
 ## Overview
 
@@ -14,7 +14,7 @@ This project showcases an implementation related to YouTube functionalities. It 
 ## Technologies Used
 
 - **Programming Language:** JavaScript
-- **Libraries/Frameworks:**  Node.js and MongoDB
+- **Libraries/Frameworks:** Node.js and MongoDB
 - **APIs:** YouTube Data API v3
 
 ## Getting Started
@@ -29,3 +29,9 @@ This project showcases an implementation related to YouTube functionalities. It 
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/your-repo-name.git
+   ```
+
+#Register User
+
+return user, accesstoken ,
+cookies -> accessToken , refreshToken
